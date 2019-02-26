@@ -6,11 +6,13 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 /**
+ * Buffer ${@link java.nio.Buffer}相关属性了解
  * @author : <a href="mailto:gnehcgnaw@gmail.com">gnehcgnaw</a>
  * @date : 2019-02-25 00:18
  * @since :
  */
 
+@SuppressWarnings("all")
 @Slf4j
 public class TestBuffer {
     public static void main(String[] args) {
