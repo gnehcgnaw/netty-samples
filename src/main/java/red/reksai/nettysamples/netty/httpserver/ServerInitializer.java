@@ -1,4 +1,4 @@
-package red.reksai.nettysamples.netty;
+package red.reksai.nettysamples.netty.httpserver;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;

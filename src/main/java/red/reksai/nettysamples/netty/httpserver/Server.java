@@ -1,4 +1,4 @@
-package red.reksai.nettysamples.netty;
+package red.reksai.nettysamples.netty.httpserver;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -8,6 +8,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 
 /**
+ * 服务端
  * @author : <a href="mailto:gnehcgnaw@gmail.com">gnehcgnaw</a>
  * @date : 2019-02-26 22:49
  * @since :
