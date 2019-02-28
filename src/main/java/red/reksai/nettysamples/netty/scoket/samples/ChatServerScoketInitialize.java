@@ -15,6 +15,7 @@ import io.netty.util.CharsetUtil;
  * @date : 2019-02-28 09:19
  * @since :
  */
+@SuppressWarnings("all")
 public class ChatServerScoketInitialize extends ChannelInitializer<SocketChannel> {
 
     @Override
