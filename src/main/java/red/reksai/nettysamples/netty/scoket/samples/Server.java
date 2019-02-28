@@ -3,7 +3,7 @@ package red.reksai.nettysamples.netty.scoket.samples;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.ServerSocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 /**
  * @author : <a href="mailto:gnehcgnaw@gmail.com">gnehcgnaw</a>
@@ -17,23 +17,11 @@ public class Server {
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(boosGroup,wokerGroup)
-            .channel(ServerSocketChannel.class)
-            .childHandler(new ChannelHandler() {
-                @Override
-                public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+            .channel(NioServerSocketChannel.class)
+            .childHandler(new ChatServerScoketInitialize());
 
-                }
-
-                @Override
-                public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-
-                }
-
-                @Override
-                public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-
-                }
-            });
+            ChannelFuture channelFuture = serverBootstrap.bind(8899).sync();
+            channelFuture.channel().closeFuture().sync();
 
         }catch (Exception ex){
             ex.printStackTrace();
