@@ -1,0 +1,11 @@
+@startuml
+autonumber
+EventLoopGroup -> EventLoopGroup: NioEventLoopGroup() : NioEventLoopGroup
+EventLoopGroup -> EventLoopGroup: NioEventLoopGroup(int nThreads)
+EventLoopGroup -> EventLoopGroup: NioEventLoopGroup(int nThreads, ThreadFactory threadFactory)
+EventLoopGroup -> EventLoopGroup: NioEventLoopGroup(int nThreads, ThreadFactory threadFactory, final SelectorProvider selectorProvider)
+note left : 使用DefaultSelectStrategyFactory.INSTANCE\n返回SelectStrategy传递给5。
+EventLoopGroup -> EventLoopGroup: NioEventLoopGroup(int nThreads, Executor executor, final SelectorProvider selectorProvider,final SelectStrategyFactory selectStrategyFactory)
+Alice -> Bob: Another authentication Request
+Alice <-- Bob: another authentication Response
+@enduml
