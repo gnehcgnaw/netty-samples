@@ -2,12 +2,96 @@
 header Page Header
 title NioEventLoopEventGroup
 autonumber
-EventLoopGroup -> EventLoopGroup: NioEventLoopGroup() : NioEventLoopGroup
-EventLoopGroup -> EventLoopGroup: NioEventLoopGroup(int nThreads)
-EventLoopGroup -> EventLoopGroup: NioEventLoopGroup(int nThreads, ThreadFactory threadFactory)
-EventLoopGroup -> EventLoopGroup: NioEventLoopGroup(int nThreads, ThreadFactory threadFactory, final SelectorProvider selectorProvider)
-note left : 使用DefaultSelectStrategyFactory.INSTANCE\n返回SelectStrategy传递给5。
-EventLoopGroup -> EventLoopGroup: NioEventLoopGroup(int nThreads, Executor executor, final SelectorProvider selectorProvider,final SelectStrategyFactory selectStrategyFactory)
-Alice -> Bob: Another authentication Request
-Alice <-- Bob: another authentication Response
+actor User
+create NioEventLoopGroup
+User ->NioEventLoopGroup:new 
+activate NioEventLoopGroup
+NioEventLoopGroup -> NioEventLoopGroup: +nThreads=0
+NioEventLoopGroup -> NioEventLoopGroup: +(Executor)null
+create SelectorProvider
+NioEventLoopGroup ->SelectorProvider:new
+activate SelectorProvider
+SelectorProvider ->SelectorProvider:SelectorProvider.provider()
+SelectorProvider -->NioEventLoopGroup:SelectorProvider
+deactivate SelectorProvider
+NioEventLoopGroup -> NioEventLoopGroup: +selectorProvider
+create DefaultSelectStrategyFactory
+NioEventLoopGroup -> DefaultSelectStrategyFactory:new
+activate DefaultSelectStrategyFactory
+DefaultSelectStrategyFactory ->DefaultSelectStrategyFactory:DefaultSelectStrategyFactory.INSTANCE
+DefaultSelectStrategyFactory -->NioEventLoopGroup:DefaultSelectStrategyFactory
+deactivate DefaultSelectStrategyFactory
+NioEventLoopGroup -> NioEventLoopGroup: +selectStrategyFactory
+create RejectedExecutionHandlers
+NioEventLoopGroup -> RejectedExecutionHandlers:new
+activate RejectedExecutionHandlers
+RejectedExecutionHandlers->RejectedExecutionHandlers:RejectedExecutionHandlers.reject()
+RejectedExecutionHandlers-->NioEventLoopGroup:+RejectedExecutionHandlers
+NioEventLoopGroup ->NioEventLoopGroup:+rejectedExecutionHandlers
+deactivate RejectedExecutionHandlers
+create MultithreadEventLoopGroup
+NioEventLoopGroup->MultithreadEventLoopGroup:new
+activate MultithreadEventLoopGroup
+MultithreadEventLoopGroup ->MultithreadEventLoopGroup:new(int nThreads, ThreadFactory threadFactory, Object... args)
+note left
+    MultithreadEventLoopGroup: 
+    DEFAULT_EVENT_LOOP_THREADS=NettyRuntime.availableProcessors() * 2 
+    nThreads为CPU核数的两倍
+    end note
+create MultithreadEventExecutorGroup
+MultithreadEventLoopGroup ->MultithreadEventExecutorGroup:new 更改nThreads为cpu*2
+activate MultithreadEventExecutorGroup
+MultithreadEventExecutorGroup ->MultithreadEventExecutorGroup:new(int nThreads, Executor executor, Object... args)
+create DefaultEventExecutorChooserFactory
+MultithreadEventExecutorGroup ->DefaultEventExecutorChooserFactory:new
+activate DefaultEventExecutorChooserFactory
+DefaultEventExecutorChooserFactory ->DefaultEventExecutorChooserFactory:DefaultEventExecutorChooserFactory.INSTANCE
+DefaultEventExecutorChooserFactory -->MultithreadEventExecutorGroup:DefaultEventExecutorChooserFactory
+deactivate DefaultEventExecutorChooserFactory
+create ThreadPerTaskExecutor
+MultithreadEventExecutorGroup->ThreadPerTaskExecutor
+activate ThreadPerTaskExecutor
+create DefaultThreadFactory
+ThreadPerTaskExecutor ->DefaultThreadFactory:newDefaultThreadFactory(getClass())
+activate DefaultThreadFactory
+DefaultThreadFactory -> DefaultThreadFactory:new(poolType)
+DefaultThreadFactory -> DefaultThreadFactory:new(poolType,daemon,priority)\ndaemon=false \npriority=Thread.NORM_PRIORITY
+note left
+    poolName生成策略
+    poolName = DefaultThreadFactory.toPoolName(poolType)
+    end note
+DefaultThreadFactory -> DefaultThreadFactory:new(poolName,daemon,priority)
+DefaultThreadFactory -> DefaultThreadFactory:new(poolName,daemon,priority,threadGroup)
+DefaultThreadFactory -->ThreadPerTaskExecutor:DefaultThreadFactory
+MultithreadEventExecutorGroup ->ThreadPerTaskExecutor:new
+ThreadPerTaskExecutor ->ThreadPerTaskExecutor:new(defaultThreadFactory)
+create EventExecutor
+MultithreadEventExecutorGroup ->EventExecutor:[nThreads]
+activate EventExecutor
+EventExecutor -> EventExecutor:new 
+EventExecutor --> MultithreadEventExecutorGroup:+eventExecutor
+deactivate
+MultithreadEventExecutorGroup-->NioEventLoopGroup:+eventExecutor
+create NioEventLoop
+NioEventLoopGroup ->NioEventLoop:newChild(eventExecutor,args)
+activate NioEventLoop
+NioEventLoop ->NioEventLoop:new (this, executor, selectorProvider,SelectStrategyFactory , selectStrategy, rejectedExecutionHandler)
+NioEventLoop ->NioEventLoop:new(parent, executor, false, DEFAULT_MAX_PENDING_TASKS, rejectedExecutionHandler)
+create SelectorTuple
+NioEventLoop ->SelectorTuple:openSelector()
+activate SelectorTuple
+SelectorTuple->SelectorTuple:selector
+SelectorTuple -->NioEventLoop:+selector
+create SingleThreadEventLoop
+NioEventLoop ->SingleThreadEventLoop:new 
+activate SingleThreadEventLoop
+SingleThreadEventLoop ->SingleThreadEventLoop:new(parent, executor,addTaskWakesUp,maxPendingTasks,rejectedExecutionHandler)
+create SingleThreadEventExecutor
+SingleThreadEventLoop ->SingleThreadEventExecutor:newTaskQueue(maxPendingTasks)
+SingleThreadEventExecutor-->SingleThreadEventLoop:queue
+NioEventLoop-->NioEventLoopGroup:nioEventLoop[i]
+NioEventLoop-->MultithreadEventExecutorGroup:children
+MultithreadEventExecutorGroup->EventExecutorChooser:DefaultEventExecutorChooserFactory.newChooser(children)
+EventExecutorChooser-->MultithreadEventExecutorGroup:chooser
+MultithreadEventExecutorGroup -> MultithreadEventExecutorGroup:+multithreadEventExecutorGroup
 @enduml
